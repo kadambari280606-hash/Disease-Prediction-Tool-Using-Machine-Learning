@@ -1,38 +1,52 @@
-import weka.classifiers.trees.J48;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.converters.ConverterUtils.DataSource;
 import java.util.Scanner;
 
-public class DiseasePrediction {
+public class FluPredictor {
 
-    private static J48 tree;
-    private static Instances data;
-
-    public static void main(String[] args) throws Exception {
-        // Load data (ARFF format recommended for Weka)
-        DataSource source = new DataSource("disease_data.arff");
-        data = source.getDataSet();
-        if (data.classIndex() == -1)
-            data.setClassIndex(data.numAttributes() - 1);
-
-        // Build classifier
-        tree = new J48();
-        tree.buildClassifier(data);
-
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter comma-separated values for symptoms (e.g., 1,0,1...): ");
-        String[] inputValues = scanner.nextLine().split(",");
 
-        // Create a new instance for prediction
-        Instance predInstance = data.instance(0).copy();
-        for (int i = 0; i < inputValues.length; i++) {
-            predInstance.setValue(i, Double.parseDouble(inputValues[i]));
+        System.out.println("--- Simple Flu Prediction Tool ---");
+        System.out.println("Answer the following questions with 'yes' or 'no'.");
+
+        // Collect user input for symptoms
+        System.out.print("Do you have a high fever? (yes/no): ");
+        String fever = scanner.nextLine().trim().toLowerCase();
+
+        System.out.print("Do you have a severe cough? (yes/no): ");
+        String cough = scanner.nextLine().trim().toLowerCase();
+
+        System.out.print("Do you experience body aches? (yes/no): ");
+        String aches = scanner.nextLine().trim().toLowerCase();
+
+        // Perform the "prediction" based on simple logic
+        String prediction = predictFlu(fever, cough, aches);
+
+        System.out.println("\n--- Prediction Results ---");
+        System.out.println(prediction);
+
+        scanner.close();
+    }
+
+    /**
+     * Simple decision logic function for flu prediction.
+     */
+    public static String predictFlu(String fever, String cough, String aches) {
+        int symptomCount = 0;
+
+        if (fever.equals("yes")) {
+            symptomCount++;
         }
-        predInstance.setDataset(data);
+        if (cough.equals("yes")) {
+            symptomCount++;
+        }
+        if (aches.equals("yes")) {
+            symptomCount++;
+        }
 
-        double result = tree.classifyInstance(predInstance);
-        String predictedDisease = data.classAttribute().value((int) result);
-        System.out.println("Predicted Disease: " + predictedDisease);
+        if (symptomCount >= 2) {
+            return "Prediction: HIGH chance of having the flu. Please consult a doctor.";
+        } else {
+            return "Prediction: LOW chance of having the flu based on these symptoms. It might be a common cold.";
+        }
     }
 }
